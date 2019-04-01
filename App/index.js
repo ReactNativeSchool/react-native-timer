@@ -11,7 +11,7 @@ import {
 
 const screen = Dimensions.get("window");
 
-const formatNumber = number => ("0" + number).slice(-2);
+const formatNumber = number => `0${number}`.slice(-2);
 
 const getRemaining = time => {
   const minutes = Math.floor(time / 60);
@@ -24,131 +24,12 @@ const createArray = length => {
   let i = 0;
   while (i < length) {
     arr.push(i.toString());
-    i++;
+    i += 1;
   }
   return arr;
 };
 const AVAILABLE_MINUTES = createArray(10);
 const AVAILABLE_SECONDS = createArray(60);
-
-export default class App extends React.Component {
-  state = {
-    selectedMinutes: "0",
-    selectedSeconds: "5",
-    remainingSeconds: null,
-    isRunning: false
-  };
-
-  interval = null;
-
-  componentDidUpdate(prevProp, prevState) {
-    if (this.state.remainingSeconds === 0 && prevState.remainingSeconds !== 0) {
-      return this.stop();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-  }
-
-  start = () => {
-    this.setState(state => ({
-      remainingSeconds:
-        parseInt(state.selectedMinutes) * 60 + parseInt(state.selectedSeconds),
-      isRunning: true
-    }));
-
-    this.interval = setInterval(() => {
-      this.setState(state => {
-        return {
-          remainingSeconds: state.remainingSeconds - 1
-        };
-      });
-    }, 1000);
-  };
-
-  stop = () => {
-    clearInterval(this.interval);
-    this.interval = null;
-
-    this.setState(state => ({
-      isRunning: false
-    }));
-  };
-
-  renderPickers = () => {
-    const { selectedMinutes, selectedSeconds } = this.state;
-    return (
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedMinutes}
-          style={styles.picker}
-          itemStyle={styles.pickerItem}
-          onValueChange={itemValue =>
-            this.setState({ selectedMinutes: itemValue })
-          }
-        >
-          {AVAILABLE_MINUTES.map(value => (
-            <Picker.Item key={value} label={value} value={value} />
-          ))}
-        </Picker>
-        <Text style={styles.pickerItem}>minutes</Text>
-        <Picker
-          selectedValue={selectedSeconds}
-          style={styles.picker}
-          itemStyle={styles.pickerItem}
-          onValueChange={itemValue =>
-            this.setState({ selectedSeconds: itemValue })
-          }
-        >
-          {AVAILABLE_SECONDS.map(value => (
-            <Picker.Item key={value} label={value} value={value} />
-          ))}
-        </Picker>
-        <Text style={styles.pickerItem}>seconds</Text>
-      </View>
-    );
-  };
-
-  render() {
-    const {
-      isRunning,
-      remainingSeconds,
-      selectedMinutes,
-      selectedSeconds
-    } = this.state;
-    const { minutes, seconds } = getRemaining(remainingSeconds);
-
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        {isRunning ? (
-          <Text style={styles.timerText}>
-            {minutes}:{seconds}
-          </Text>
-        ) : (
-          this.renderPickers()
-        )}
-        {isRunning ? (
-          <TouchableOpacity
-            onPress={this.stop}
-            style={[styles.button, styles.buttonPause]}
-          >
-            <Text style={[styles.buttonText, styles.buttonTextPause]}>
-              Stop
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={this.start} style={styles.button}>
-            <Text style={styles.buttonText}>Start</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  }
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -193,3 +74,119 @@ const styles = StyleSheet.create({
     fontSize: 20
   }
 });
+
+export default class App extends React.Component {
+  state = {
+    selectedMinutes: "0",
+    selectedSeconds: "5",
+    remainingSeconds: null,
+    isRunning: false
+  };
+
+  interval = null;
+
+  componentDidUpdate(prevProp, prevState) {
+    if (this.state.remainingSeconds === 0 && prevState.remainingSeconds !== 0) {
+      return this.stop();
+    }
+    return null;
+  }
+
+  componentWillUnmount() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
+
+  start = () => {
+    this.setState(state => ({
+      remainingSeconds:
+        parseInt(state.selectedMinutes, 10) * 60 +
+        parseInt(state.selectedSeconds, 10),
+      isRunning: true
+    }));
+
+    this.interval = setInterval(() => {
+      this.setState(state => ({
+        remainingSeconds: state.remainingSeconds - 1
+      }));
+    }, 1000);
+  };
+
+  stop = () => {
+    clearInterval(this.interval);
+    this.interval = null;
+
+    this.setState({
+      isRunning: false
+    });
+  };
+
+  renderPickers = () => {
+    const { selectedMinutes, selectedSeconds } = this.state;
+    return (
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedMinutes}
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          onValueChange={itemValue =>
+            this.setState({ selectedMinutes: itemValue })
+          }
+        >
+          {AVAILABLE_MINUTES.map(value => (
+            <Picker.Item key={value} label={value} value={value} />
+          ))}
+        </Picker>
+        <Text style={styles.pickerItem}>minutes</Text>
+        <Picker
+          selectedValue={selectedSeconds}
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          onValueChange={itemValue =>
+            this.setState({ selectedSeconds: itemValue })
+          }
+        >
+          {AVAILABLE_SECONDS.map(value => (
+            <Picker.Item key={value} label={value} value={value} />
+          ))}
+        </Picker>
+        <Text style={styles.pickerItem}>seconds</Text>
+      </View>
+    );
+  };
+
+  render() {
+    const { isRunning, remainingSeconds } = this.state;
+    const { minutes, seconds } = getRemaining(remainingSeconds);
+
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        {isRunning ? (
+          <Text style={styles.timerText}>
+            {minutes}
+:
+            {seconds}
+          </Text>
+        ) : (
+          this.renderPickers()
+        )}
+        {isRunning ? (
+          <TouchableOpacity
+            onPress={this.stop}
+            style={[styles.button, styles.buttonPause]}
+          >
+            <Text style={[styles.buttonText, styles.buttonTextPause]}>
+              Stop
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={this.start} style={styles.button}>
+            <Text style={styles.buttonText}>Start</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }
+}
