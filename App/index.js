@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
   Picker,
-  StatusBar
+  StatusBar,
+  Platform
 } from "react-native";
 
 const screen = Dimensions.get("window");
@@ -67,7 +68,15 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   picker: {
-    width: 50
+    width: 50,
+    ...Platform.select({
+      android: {
+        color: "#fff",
+        backgroundColor: "#07121B",
+        marginLeft: 10,
+        alignContent: "flex-end"
+      }
+    })
   },
   pickerItem: {
     color: "#fff",
@@ -87,9 +96,8 @@ export default class App extends React.Component {
 
   componentDidUpdate(prevProp, prevState) {
     if (this.state.remainingSeconds === 0 && prevState.remainingSeconds !== 0) {
-      return this.stop();
+      this.stop();
     }
-    return null;
   }
 
   componentWillUnmount() {
@@ -122,7 +130,7 @@ export default class App extends React.Component {
     });
   };
 
-  renderPickers = () => {
+  renderPickerIOS = () => {
     const { selectedMinutes, selectedSeconds } = this.state;
     return (
       <View style={styles.pickerContainer}>
@@ -156,6 +164,53 @@ export default class App extends React.Component {
     );
   };
 
+  renderPickerAndroid = () => {
+    const { selectedMinutes, selectedSeconds } = this.state;
+    return (
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedMinutes}
+          style={styles.picker}
+          onValueChange={itemValue =>
+            this.setState({ selectedMinutes: itemValue })
+          }
+          itemStyle={styles.pickerItem}
+          mode="dropdown"
+        >
+          {AVAILABLE_MINUTES.map(value => (
+            <Picker.Item key={value} label={value} value={value} />
+          ))}
+        </Picker>
+        {/* <Text style={styles.pickerItem}>{`${selectedMinutes} minutes`}</Text> */}
+        <Text style={styles.pickerItem}>minutes</Text>
+
+        <Picker
+          selectedValue={selectedSeconds}
+          style={styles.picker}
+          onValueChange={itemValue =>
+            this.setState({ selectedSeconds: itemValue })
+          }
+          itemStyle={styles.pickerItem}
+          mode="dropdown"
+        >
+          {AVAILABLE_SECONDS.map(value => (
+            <Picker.Item key={value} label={value} value={value} />
+          ))}
+        </Picker>
+        {/* <Text style={styles.pickerItem}>{`${selectedSeconds} seconds`}</Text> */}
+        <Text style={styles.pickerItem}>seconds</Text>
+      </View>
+    );
+  };
+
+  renderPickers = () => {
+    if (Platform.OS === "android") {
+      return this.renderPickerAndroid();
+    }
+
+    return this.renderPickerIOS();
+  };
+
   render() {
     const { isRunning, remainingSeconds } = this.state;
     const { minutes, seconds } = getRemaining(remainingSeconds);
@@ -164,11 +219,7 @@ export default class App extends React.Component {
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         {isRunning ? (
-          <Text style={styles.timerText}>
-            {minutes}
-:
-            {seconds}
-          </Text>
+          <Text style={styles.timerText}>{`${minutes}:${seconds}`}</Text>
         ) : (
           this.renderPickers()
         )}
