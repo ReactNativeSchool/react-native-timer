@@ -6,9 +6,9 @@ import {
   StatusBar,
   TouchableOpacity,
   Dimensions,
-  Picker,
   Platform,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 const screen = Dimensions.get("window");
 
@@ -100,7 +100,6 @@ const Pickers = ({
       onValueChange={(itemValue) => {
         setSelectedMinutes(itemValue);
       }}
-      mode="dropdown"
     >
       {AVAILABLE_MINUTES.map((value) => (
         <Picker.Item key={value} label={value} value={value} />
