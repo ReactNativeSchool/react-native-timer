@@ -124,13 +124,9 @@ const Pickers = ({
   </View>
 );
 
-export default () => {
+const useTimer = ({ selectedMinutes, selectedSeconds }) => {
   const [isRunning, setIsRunning] = React.useState(false);
   const [remainingSeconds, setRemainingSeconds] = React.useState(5);
-  const [selectedMinutes, setSelectedMinutes] = React.useState("0");
-  const [selectedSeconds, setSelectedSeconds] = React.useState("5");
-
-  const { minutes, seconds } = getRemaining(remainingSeconds);
 
   const start = () => {
     setRemainingSeconds(
@@ -168,6 +164,25 @@ export default () => {
       stop();
     }
   }, [remainingSeconds]);
+
+  return {
+    isRunning,
+    start,
+    stop,
+    remainingSeconds,
+  };
+};
+
+export default () => {
+  const [selectedMinutes, setSelectedMinutes] = React.useState("0");
+  const [selectedSeconds, setSelectedSeconds] = React.useState("5");
+
+  const { isRunning, start, stop, remainingSeconds } = useTimer({
+    selectedMinutes,
+    selectedSeconds,
+  });
+
+  const { minutes, seconds } = getRemaining(remainingSeconds);
 
   return (
     <View style={styles.container}>
