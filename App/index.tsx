@@ -64,15 +64,15 @@ const styles = StyleSheet.create({
 });
 
 // 3 => 03, 10 => 10
-const formatNumber = (number) => `0${number}`.slice(-2);
+const formatNumber = (number: number) => `0${number}`.slice(-2);
 
-const getRemaining = (time) => {
+const getRemaining = (time: number) => {
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
   return { minutes: formatNumber(minutes), seconds: formatNumber(seconds) };
 };
 
-const createArray = (length) => {
+const createArray = (length: number) => {
   const arr = [];
   let i = 0;
   while (i < length) {
@@ -86,12 +86,19 @@ const createArray = (length) => {
 const AVAILABLE_MINUTES = createArray(10);
 const AVAILABLE_SECONDS = createArray(60);
 
+type PickerProps = {
+  selectedMinutes: string;
+  selectedSeconds: string;
+  setSelectedMinutes: (item: string) => void;
+  setSelectedSeconds: (item: string) => void;
+};
+
 const Pickers = ({
   selectedMinutes,
   setSelectedMinutes,
   selectedSeconds,
   setSelectedSeconds,
-}) => (
+}: PickerProps) => (
   <View style={styles.pickerContainer}>
     <Picker
       style={styles.picker}
@@ -123,7 +130,12 @@ const Pickers = ({
   </View>
 );
 
-const useTimer = ({ selectedMinutes, selectedSeconds }) => {
+type userTimerProps = {
+  selectedMinutes: string;
+  selectedSeconds: string;
+};
+
+const useTimer = ({ selectedMinutes, selectedSeconds }: userTimerProps) => {
   const [isRunning, setIsRunning] = React.useState(false);
   const [remainingSeconds, setRemainingSeconds] = React.useState(5);
 
@@ -139,14 +151,16 @@ const useTimer = ({ selectedMinutes, selectedSeconds }) => {
   };
 
   React.useEffect(() => {
-    let interval;
+    let interval: number | null = null;
     if (isRunning) {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         setRemainingSeconds((prevSeconds) => prevSeconds - 1);
       }, 1000);
     } else {
-      clearInterval(interval);
-      interval = null;
+      if (interval) {
+        window.clearInterval(interval);
+        interval = null;
+      }
       setIsRunning(false);
       setRemainingSeconds(5);
     }
